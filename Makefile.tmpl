@@ -1,0 +1,24 @@
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+current_algo := $(strip $(patsubst .%, %, $(current_dir)))
+header := $(strip $(patsubst %, "\"%.h\"", $(current_algo)))
+DEPS= $(patsubst %.o, ../%.c, $(OBJ)) ../$(current_algo).c
+CURR_OBJS= $(OBJ) $(current_algo).o
+
+.PHONY: all cp
+
+all: makefile.dep $(current_algo) cp 
+
+makefile.dep:
+	@(for i in $(DEPS); do ${CC} -MM "$${i}" -D ALGO_H=$(header) | sed '$$s/$$/ Makefile ..\/Makefile/'; /bin/echo -e "\t\$$(CC) \$$(CFLAGS) -c \$$< -D ALGO_H=\$$(header) -o \$$@"; done > makefile.dep)
+
+-include makefile.dep
+
+cp: $(current_algo)
+	@cp $(current_algo) ../
+
+$(current_algo): $(CURR_OBJS)
+	$(CC) $(CFLAGS) $(CURR_OBJS) -o $(current_algo) $(LDFLAGS)
+
+
+
