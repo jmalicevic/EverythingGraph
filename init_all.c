@@ -876,10 +876,10 @@ void init(int full) {
 		case 6: //grid using sorting but cells are sorted by src (not dst)
 			init_grid_sort(full, 1);
 			break;
-		case 7: //edgelista is adjacency list
+		case 7: //edgelista is adjacency list (sorted by source)
 			init_edgelist(full, 0, 1);
 			break;
-		case 8: //grid using sorting but cells are sorted by src and sorted as columns (not dst)
+		case 8: //edge list is sorted by source and then by destination within edges having the same source
 			init_edgelist(full, 1, 1);
 			break;
 		case 9: init_edgelist(full, 0, 0);
