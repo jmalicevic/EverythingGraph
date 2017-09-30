@@ -36,13 +36,25 @@ static uint32_t edges_seen = 0;
 //runs PR over all edges stored inside an edgelist so we can still use the loading mode 2 or 3 here
 static inline void pr_algo_edgecentric() { 
 	//For this to be corect, the degree needs to be counted , it is counted towards the pre-processing time
-	parallel_for(uint32_t i  = 0; i < nb_edges;i++) {
+	int iterations = 0;
+	while(iterations++ < 10) {
 
-		struct edge_t* e = &memblock[i];
-		uint32_t src = e->src;
-		uint32_t dst = e->dst;
-		write_add(&rank[dst], prev[src] / nodes[src].nb_out_edges); 
-	}	
+
+		parallel_for(uint32_t i = 0;i < nb_edges;i++) {
+
+			struct edge_t *e = &memblock[i];
+			uint32_t src = e->src;
+			uint32_t dst = e->dst;
+			write_add(&rank[dst], prev[src] / (float) nodes[src].nb_out_edges);
+		}
+
+		parallel_for(uint32_t i = 0; i < NB_NODES; i++) {
+			rank[i] = adding_constant + DAMPING_FACTOR * rank[i];
+			prev[i] = rank[i];
+			rank[i] = 0.0;
+		}
+
+	}
 }
 static inline void pr_algo_push(){
 	parallel_for(uint32_t i = 0; i < NB_NODES; i++) {

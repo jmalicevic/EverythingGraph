@@ -25,16 +25,22 @@ static struct thread_buffer thread_buffers[ALGO_NB_THREADS];
 /*
  * Actual  pr algorithm
  */
-int CAS(float * ptr, float oldV, float newV){
-	return(__sync_bool_compare_and_swap((long*)ptr, *((long*)&oldV), *((long*)&newV)));
+template <class ET>
+inline bool cas(ET *ptr, ET oldv, ET newv) {
+if (sizeof(ET) == 8) {
+return __sync_bool_compare_and_swap((long*)ptr, *((long*)&oldv), *((long*)&newv));
+} else if (sizeof(ET) == 4) {
+return __sync_bool_compare_and_swap((int*)ptr, *((int*)&oldv), *((int*)&newv));
+} else {
+assert(false);
 }
-void write_add(float* _rank, float  val){
-	volatile float newV, oldV;
-
-	do {oldV = *_rank;  newV = oldV+val;}
-	while(!CAS(_rank, oldV, newV)); 
 }
-
+template <class ET>
+inline void write_add(ET *a, ET b) {
+volatile ET newV, oldV;
+do {oldV = *a; newV = oldV + b;}
+while (!cas(a, oldV, newV));
+}
 
 static uint32_t edges_seen = 0;
 
@@ -54,8 +60,8 @@ static inline void prgrid_algo_nosort(){
 
 //offsets here store the actuall offset of a cell, not its size and the grid is actually still in memblock
 static inline void prgrid_algo() { 
-	parallel_for(uint32_t j = 0; j < P; j++) {
-		for(int i = 0; i < P; i++) {
+	for(uint32_t i = 0; i < P; i++) {
+		parallel_for(int j = 0; j < P; j++) {
 			uint32_t start = row_offsets[i] + offsets[i][j];
 			uint32_t stop =  (j == P - 1 ? (i == P - 1? nb_edges : row_offsets[i+1] ) : row_offsets[i] +  offsets[i][j+1] ); 
 			for( ; start < stop; start++) 			{
