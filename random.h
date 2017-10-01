@@ -31,7 +31,7 @@
 
 #define NUMA 1
 #define NAIVE_SPLIT 0   // Do smarter load repartition if 0
-#define WEIGHTED 0 // set flag to 1  
+#define WEIGHTED 1 // set flag to 1  
 extern int silent;
 extern int isSymmetric;
 extern int createUndir;

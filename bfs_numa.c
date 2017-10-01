@@ -14,7 +14,7 @@
 #include <cilk/reducer_opadd.h>
 #include "barrier.h"
 #define ROOT 0
-#define NUMA_PART 2
+#define NUMA_PART 8
 
 uint32_t* parent;
 uint32_t* active;
@@ -104,7 +104,7 @@ void bfsnuma_construct(){
 	}
 	char* array = (char*) mmap(NULL, sizeof(uint32_t) * NB_NODES, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	assert(array != (void*)-1);
-	int num_part = numa_num_configured_nodes();
+	int num_part = 8;// numa_num_configured_nodes();
 	printf("NUMA partitions: %d\n", num_part);
 
 	char* curr_work_t = (char*) mmap(NULL, sizeof(uint32_t) * NUMA_PART, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -172,7 +172,8 @@ void bfsnuma_construct(){
 	parallel_for(uint32_t i = 0; i < NB_NODES; i++) {
 		//do the actual edge copy 
 		int edge_idx[NUMA_PART];
-		edge_idx[0] = edge_idx[1] = 0;
+		for(int i = 0; i < NUMA_PART; i++) edge_idx[i] = 0;
+		
 		for(uint32_t idx = 0; idx < nodes[i].nb_out_edges; idx++) {
 			int node = getNuma_node(edge_array_out[nodes[i].outgoing_edges + idx].dst);
 			struct edge* e  = &edge_array_numa[node][edge_part_offsets[node][i] + edge_idx[node]];
