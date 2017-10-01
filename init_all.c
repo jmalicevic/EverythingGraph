@@ -872,7 +872,7 @@ void init(int full) {
 			init_adj_count(); //full);
 			break;
 		case 5: init_adj_dynamic();
-
+		 break;
 		case 6: //grid using sorting but cells are sorted by src (not dst)
 			init_grid_sort(full, 1);
 			break;
