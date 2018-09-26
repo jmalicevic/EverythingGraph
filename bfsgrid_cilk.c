@@ -153,6 +153,7 @@ static used void iterator(struct node *nodes) {
 				int pid = get_partition_id(i);
 				active[pid] = 1;
 			}
+      }
 			parallel_for(uint32_t i = 0; i < NB_NODES; i++) {
 				in_frontier_next[i] = 0; 
 			}
@@ -160,7 +161,7 @@ static used void iterator(struct node *nodes) {
 			printf("#Iter %d, items %d , time %f\n", iterations, items_in_frontier, (float)(iter_stop - iter_start)/(float)get_cpu_freq());	
 			edges_to_stream = 0; p_active = 0; prev_nodes = 0; switch_time = 0;
 			iterations++;
-		}
+		
 
 	}
 
