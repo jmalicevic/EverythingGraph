@@ -22,14 +22,17 @@ static struct thread_buffer thread_buffers[ALGO_NB_THREADS];
 /*
  * Actual  pr algorithm
  */
-int CAS(float * ptr, float oldV, float newV){
-	return(__sync_bool_compare_and_swap((long*)ptr, *((long*)&oldV), *((long*)&newV)));
+template <typename ET>
+inline bool CAS_GCC(ET *ptr, ET oldv, ET newv) {
+return __sync_bool_compare_and_swap((long*)(&(*ptr)), oldv, newv);
 }
-void write_add(float* _rank, float  val){
-	volatile float newV, oldV;
 
-	do {oldV = *_rank;  newV = oldV+val;}
-	while(!CAS(_rank, oldV, newV)); 
+
+template <typename E, typename EV>
+inline void write_add(E *a, EV b) {
+volatile E newV, oldV;
+do {oldV = *a; newV = oldV + b;}
+while (!CAS_GCC(a, oldV, newV));
 }
 
 static uint32_t edges_seen = 0;
@@ -61,7 +64,7 @@ static inline void pr_algo_push(){
 		struct node* n = &nodes[i];
 		for(uint32_t j = 0; j < n->nb_out_edges; j++) {
 			uint32_t dst_id = edge_array_out[n->outgoing_edges + j].dst;
-			write_add(&rank[dst_id], prev[i]/n->nb_out_edges); // Update SUM of destination
+			write_add(&rank[dst_id], prev[i]/(float)n->nb_out_edges); // Update SUM of destination
 		}
 	}
 }
